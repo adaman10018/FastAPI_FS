@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Query, Body, Path
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 
 router = APIRouter(
@@ -8,11 +8,19 @@ router = APIRouter(
     tags = ['blog']
 )
 
+
+class Image(BaseModel):
+    url: str
+    alias: str
+
 class BlogModel(BaseModel):
     title: str
     content: str
     num_comments: int
     published: Optional[bool]
+    tags: List[str] = []
+    metadata: Dict[str, str] = {'key1': 'value1'}
+    image: Optional[Image] = None
 
 @router.post('/new/{id}')
 def create_blog(blog: BlogModel, id: int, version: int = 1):
@@ -37,7 +45,7 @@ def create_comment(
         ...,  # ... (Ellipsis) makes content required
         min_length=10,
         max_length=12,
-        regex='^[a-z\s]*$'
+        regex='^[a-z]*.*$'
     ),
     v: Optional[List[str]] = Query(['1.0', '1.1', '1.2']),
     comment_id: int = Path(..., gt=5, le=10) 
